@@ -66,22 +66,18 @@ function Login() {
           await saveProfile(data.user, name.trim())
           setMessage('تم إنشاء حسابك وحفظ بياناتك بنجاح!')
         } else {
-          setMessage('تم إنشاء الحساب. أكد بريدك الإلكتروني ثم سجل الدخول لحفظ بياناتك.')
+          setMessage('تم إنشاء الحساب. أكد بريدك الإلكتروني ثم سجل الدخول.')
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
 
         if (error) throw error
 
-        const fullName =
-          data.user.user_metadata?.full_name || ''
-
-        await saveProfile(data.user, fullName)
-
-        setMessage('تم تسجيل الدخول وحفظ بياناتك بنجاح!')
+        // لا نعيد كتابة الاسم عند تسجيل الدخول
+        setMessage('تم تسجيل الدخول بنجاح!')
       }
     } catch (error) {
       setMessage(

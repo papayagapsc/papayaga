@@ -6,6 +6,42 @@ import Booking from './Booking'
 import { supabase } from './supabase'
 
 type Section = 'home' | 'bookings' | 'payments' | 'customers' | 'branches'
+type Theme = 'light' | 'dark'
+
+function ThemeToggle({
+  theme,
+  onToggle,
+}: {
+  theme: Theme
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={theme === 'light' ? 'تفعيل الوضع الداكن' : 'تفعيل الوضع الفاتح'}
+      title={theme === 'light' ? 'الوضع الداكن' : 'الوضع الفاتح'}
+      style={{
+        position: 'fixed',
+        bottom: 22,
+        left: 22,
+        zIndex: 100000,
+        padding: '12px 18px',
+        borderRadius: 30,
+        border: '1px solid var(--border-strong)',
+        background: 'var(--surface)',
+        color: 'var(--text)',
+        boxShadow: '0 4px 18px rgba(0,0,0,.18)',
+        cursor: 'pointer',
+        fontWeight: 800,
+        fontSize: 14,
+        direction: 'rtl',
+      }}
+    >
+      {theme === 'light' ? '🌙 الوضع الداكن' : '☀️ الوضع الفاتح'}
+    </button>
+  )
+}
 
 function Brand({ onClick }: { onClick: () => void }) {
   return (
@@ -13,48 +49,67 @@ function Brand({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="العودة إلى الصفحة الرئيسية"
+      className="brand-logo"
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
+        gap: 12,
         direction: 'ltr',
         background: 'transparent',
         border: 'none',
         padding: 0,
         cursor: 'pointer',
-        color: '#f5f3ef',
+        color: 'var(--text)',
         textAlign: 'left',
+        boxShadow: 'none',
+        transform: 'none',
       }}
     >
       <img
         src="/LOGO.png"
-        alt="papa yaga"
+        alt="Papa Yaga Logo"
         style={{
-          width: 65,
-          height: 65,
+          width: 58,
+          height: 58,
           objectFit: 'contain',
           display: 'block',
+          background: 'transparent',
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
         }}
       />
+
       <span
         style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: 7,
-          flexWrap: 'wrap',
-          fontFamily: 'Montserrat, sans-serif',
-          fontSize: 17,
-          fontWeight: 900,
-          letterSpacing: '-.6px',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          gap: 2,
+          lineHeight: 1.1,
         }}
       >
-        papa yaga
-        <span style={{ color: '#777e7a' }}>-</span>
+        <span
+          style={{
+            fontFamily: 'Montserrat, sans-serif',
+            fontSize: 19,
+            fontWeight: 900,
+            letterSpacing: '1px',
+            color: 'var(--text)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          PAPA YAGA
+        </span>
+
         <span
           style={{
             fontFamily: 'Cairo, sans-serif',
-            fontWeight: 800,
-            letterSpacing: 0,
+            fontSize: 12,
+            fontWeight: 700,
+            color: 'var(--muted)',
+            whiteSpace: 'nowrap',
           }}
         >
           بابا ياجا
@@ -64,7 +119,15 @@ function Brand({ onClick }: { onClick: () => void }) {
   )
 }
 
-function AdminDashboard({ onBack }: { onBack: () => void }) {
+function AdminDashboard({
+  onBack,
+  theme,
+  onToggleTheme,
+}: {
+  onBack: () => void
+  theme: Theme
+  onToggleTheme: () => void
+}) {
   const [section, setSection] = useState<Section>('home')
   const [bookings, setBookings] = useState<any[]>([])
   const [payments, setPayments] = useState<any[]>([])
@@ -78,9 +141,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
     setLoading(true)
     setMessage('')
 
-    const { data, error } = await supabase.rpc(
-      'get_admin_dashboard_data'
-    )
+    const { data, error } = await supabase.rpc('get_admin_dashboard_data')
 
     if (error) {
       setMessage('حدث خطأ أثناء تحميل بيانات الإدارة: ' + error.message)
@@ -232,9 +293,9 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   ).length
 
   const buttonStyle = {
-    background: '#252a29',
-    color: '#fff',
-    border: '1px solid rgba(255,255,255,.12)',
+    background: 'var(--surface-3)',
+    color: 'var(--text)',
+    border: '1px solid var(--border)',
     padding: '12px 16px',
     borderRadius: 8,
     cursor: 'pointer',
@@ -244,8 +305,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   }
 
   const cardStyle = {
-    background: '#151919',
-    border: '1px solid rgba(255,255,255,.09)',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
@@ -281,7 +342,6 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
     return bookings.map((booking) => (
       <article key={booking.id} style={cardStyle}>
         <h3>حجز #{booking.id.slice(0, 8)}</h3>
-
         <p><strong>العميل:</strong> {booking.customer_name || 'غير مسجل'}</p>
         <p><strong>الهاتف:</strong> {booking.customer_phone || 'غير مسجل'}</p>
         <p><strong>البريد:</strong> {booking.customer_email || 'غير مسجل'}</p>
@@ -297,7 +357,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           <div
             key={period.id}
             style={{
-              background: '#202625',
+              background: 'var(--surface-2)',
               padding: 12,
               borderRadius: 8,
               marginBottom: 10,
@@ -316,6 +376,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
             style={{
               ...buttonStyle,
               background: '#542b29',
+              color: '#fff',
               marginTop: 10,
             }}
             disabled={working}
@@ -336,7 +397,6 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
     return payments.map((payment) => (
       <article key={payment.id} style={cardStyle}>
         <h3>طلب دفع #{payment.id.slice(0, 8)}</h3>
-
         <p><strong>رقم الحجز:</strong> {payment.booking_id}</p>
         <p><strong>المبلغ:</strong> {payment.amount} جنيه</p>
         <p><strong>رقم التحويل:</strong> {payment.transaction_reference || 'غير مسجل'}</p>
@@ -354,7 +414,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
             rel="noreferrer"
             style={{
               display: 'block',
-              color: '#fff',
+              color: 'var(--text)',
               margin: '16px 0',
               textDecoration: 'underline',
             }}
@@ -368,7 +428,12 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
         {payment.payment_status === 'pending' && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <button
-              style={{ ...buttonStyle, background: '#28543a', flex: 1 }}
+              style={{
+                ...buttonStyle,
+                background: '#28543a',
+                color: '#fff',
+                flex: 1,
+              }}
               disabled={working}
               onClick={() => approvePayment(payment.id)}
             >
@@ -376,7 +441,12 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
             </button>
 
             <button
-              style={{ ...buttonStyle, background: '#542b29', flex: 1 }}
+              style={{
+                ...buttonStyle,
+                background: '#542b29',
+                color: '#fff',
+                flex: 1,
+              }}
               disabled={working}
               onClick={() => rejectPayment(payment.id)}
             >
@@ -421,7 +491,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           <div
             key={device.id}
             style={{
-              background: '#202625',
+              background: 'var(--surface-2)',
               padding: 12,
               borderRadius: 8,
               marginBottom: 8,
@@ -438,9 +508,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   }
 
   function renderContent() {
-    if (loading) {
-      return <p>جارٍ تحميل بيانات الإدارة...</p>
-    }
+    if (loading) return <p>جارٍ تحميل بيانات الإدارة...</p>
 
     switch (section) {
       case 'home':
@@ -469,13 +537,10 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
 
       case 'bookings':
         return <><h2>إدارة الحجوزات</h2>{renderBookings()}</>
-
       case 'payments':
         return <><h2>إدارة المدفوعات</h2>{renderPayments()}</>
-
       case 'customers':
         return <><h2>إدارة العملاء</h2>{renderCustomers()}</>
-
       case 'branches':
         return <><h2>الفروع والأجهزة</h2>{renderBranches()}</>
     }
@@ -491,6 +556,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
 
   return (
     <main className="app" dir="rtl">
+      <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
       <nav className="navbar">
         <Brand onClick={onBack} />
         <button className="login-button" onClick={onBack}>
@@ -509,8 +576,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
       >
         <aside
           style={{
-            background: '#111515',
-            border: '1px solid rgba(255,255,255,.09)',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
             borderRadius: 12,
             padding: 15,
             position: 'sticky',
@@ -525,9 +592,9 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
               onClick={() => setSection(item.id)}
               style={{
                 ...buttonStyle,
-                background: section === item.id ? '#343b38' : '#202625',
+                background: section === item.id ? 'var(--surface-3)' : 'var(--surface-2)',
                 marginBottom: 9,
-                borderColor: section === item.id ? '#9b8067' : 'rgba(255,255,255,.09)',
+                borderColor: section === item.id ? 'var(--wood)' : 'var(--border)',
               }}
             >
               {item.label}
@@ -545,8 +612,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
 
         <section
           style={{
-            background: '#101414',
-            border: '1px solid rgba(255,255,255,.09)',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
             borderRadius: 12,
             padding: 20,
             minHeight: 500,
@@ -554,7 +621,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           }}
         >
           {message && (
-            <p style={{ background: '#202625', padding: 12, borderRadius: 8 }}>
+            <p style={{ background: 'var(--surface-2)', padding: 12, borderRadius: 8 }}>
               {message}
             </p>
           )}
@@ -567,6 +634,11 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
 }
 
 function App() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = localStorage.getItem('papa-yaga-theme')
+    return savedTheme === 'dark' ? 'dark' : 'light'
+  })
+
   const [showLogin, setShowLogin] = useState(false)
   const [showBooking, setShowBooking] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
@@ -582,6 +654,15 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('papa-yaga-theme', theme)
+  }, [theme])
+
+  function toggleTheme() {
+    setTheme((currentTheme) => currentTheme === 'light' ? 'dark' : 'light')
+  }
+
   function goHome() {
     setShowLogin(false)
     setShowBooking(false)
@@ -591,11 +672,8 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Scroll Reveal: إظهار العناصر عند وصولها إلى الشاشة
   useEffect(() => {
-    if (user || showLogin || showBooking || showAdmin || checkingAuth) {
-      return
-    }
+    if (user || showLogin || showBooking || showAdmin || checkingAuth) return
 
     const elements = document.querySelectorAll(
       '.services .service-card, .branches > *'
@@ -610,14 +688,10 @@ function App() {
           }
         })
       },
-      {
-        threshold: 0.15,
-      }
+      { threshold: 0.15 }
     )
 
-    elements.forEach((element) => {
-      observer.observe(element)
-    })
+    elements.forEach((element) => observer.observe(element))
 
     return () => observer.disconnect()
   }, [user, showLogin, showBooking, showAdmin, checkingAuth])
@@ -649,7 +723,6 @@ function App() {
       }
 
       setCheckingAdmin(true)
-
       const { data, error } = await supabase.rpc('is_admin')
 
       if (active) {
@@ -659,13 +732,12 @@ function App() {
     }
 
     checkAdmin()
-
-    return () => {
-      active = false
-    }
+    return () => { active = false }
   }, [user])
 
   useEffect(() => {
+    let active = true
+
     async function loadProfile() {
       if (!user) {
         setProfile(null)
@@ -678,6 +750,8 @@ function App() {
         .eq('id', user.id)
         .maybeSingle()
 
+      if (!active) return
+
       if (error) {
         console.error('Profile error:', error.message)
         return
@@ -687,6 +761,10 @@ function App() {
     }
 
     loadProfile()
+
+    return () => {
+      active = false
+    }
   }, [user])
 
   function startEditing() {
@@ -694,6 +772,7 @@ function App() {
     setEditPhone(profile?.phone || '')
     setMessage('')
     setEditing(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   async function saveProfile() {
@@ -702,28 +781,55 @@ function App() {
       return
     }
 
+    if (!user?.id) {
+      setMessage('انتهت جلسة تسجيل الدخول. سجل الدخول مرة أخرى.')
+      return
+    }
+
     setSaving(true)
     setMessage('')
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        full_name: editName.trim(),
-        phone: editPhone.trim() || null,
-      })
-      .select('full_name, phone')
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editName.trim(),
+          phone: editPhone.trim() || null,
+        })
+        .eq('id', user.id)
+        .select('id, full_name, phone')
+        .maybeSingle()
 
-    if (error) {
-      setMessage('حدث خطأ أثناء حفظ البيانات: ' + error.message)
-    } else {
-      setProfile(data)
+      if (error) {
+        console.error('Profile update error:', error)
+        setMessage('فشل حفظ البيانات: ' + error.message)
+        return
+      }
+
+      if (!data) {
+        setMessage('لم يتم العثور على سجل بياناتك في قاعدة البيانات.')
+        console.error('No profile row updated for user:', user.id)
+        return
+      }
+
+      setProfile({
+        full_name: data.full_name,
+        phone: data.phone,
+      })
+
+      setEditName(data.full_name || '')
+      setEditPhone(data.phone || '')
       setEditing(false)
       setMessage('تم حفظ بياناتك بنجاح!')
-    }
 
-    setSaving(false)
+      console.log('Profile saved successfully:', data)
+
+    } catch (error) {
+      console.error('Unexpected profile error:', error)
+      setMessage('حدث خطأ غير متوقع أثناء حفظ البيانات.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function handleLogout() {
@@ -745,6 +851,7 @@ function App() {
   if (checkingAuth) {
     return (
       <div className="app" dir="rtl">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
         <nav className="navbar">
           <Brand onClick={goHome} />
         </nav>
@@ -755,12 +862,19 @@ function App() {
 
   if (user) {
     if (showAdmin && isAdmin) {
-      return <AdminDashboard onBack={goHome} />
+      return (
+        <AdminDashboard
+          onBack={goHome}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )
     }
 
     if (showBooking) {
       return (
         <main className="app" dir="rtl">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <nav className="navbar">
             <Brand onClick={goHome} />
             <button className="login-button" onClick={goHome}>
@@ -774,15 +888,14 @@ function App() {
 
     return (
       <main className="app" dir="rtl">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+
         <nav className="navbar">
           <Brand onClick={goHome} />
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {!checkingAdmin && isAdmin && (
-              <button
-                className="main-button"
-                onClick={() => setShowAdmin(true)}
-              >
+              <button className="main-button" onClick={() => setShowAdmin(true)}>
                 لوحة الإدارة
               </button>
             )}
@@ -799,9 +912,7 @@ function App() {
             أهلاً بعودتك
             <br />
             <span>
-              {profile?.full_name ||
-                user.user_metadata?.full_name ||
-                user.email}
+              {profile?.full_name || user.user_metadata?.full_name || user.email}
             </span>
           </h1>
           <p className="hero-description">
@@ -842,51 +953,114 @@ function App() {
               </div>
 
               <button
+                type="button"
+                className="main-button"
+                onClick={startEditing}
+              >
+                تعديل البيانات
+              </button>
+
+              <button
+                type="button"
                 className="main-button"
                 onClick={() => setShowBooking(true)}
               >
                 احجز الآن
               </button>
-
-              <button className="main-button" onClick={startEditing}>
-                تعديل البيانات
-              </button>
             </>
           ) : (
-            <div className="service-card">
+            <div
+              className="profile-edit-card"
+              style={{
+                display: 'block',
+                opacity: 1,
+                visibility: 'visible',
+                transform: 'none',
+                position: 'relative',
+                zIndex: 10,
+                width: '100%',
+                maxWidth: 650,
+                margin: '20px auto',
+                padding: 24,
+                borderRadius: 12,
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+              }}
+            >
               <h3>تعديل بياناتك الشخصية</h3>
 
+              <label
+                htmlFor="edit-profile-name"
+                style={{ display: 'block', marginBottom: 8 }}
+              >
+                الاسم بالكامل
+              </label>
+
               <input
+                id="edit-profile-name"
                 type="text"
                 placeholder="الاسم بالكامل"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  marginBottom: 18,
+                  padding: 12,
+                  color: 'var(--text)',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                }}
               />
 
+              <label
+                htmlFor="edit-profile-phone"
+                style={{ display: 'block', marginBottom: 8 }}
+              >
+                رقم الهاتف
+              </label>
+
               <input
+                id="edit-profile-phone"
                 type="tel"
                 placeholder="رقم الهاتف"
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  marginBottom: 20,
+                  padding: 12,
+                  color: 'var(--text)',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                }}
               />
 
-              <button
-                className="main-button"
-                onClick={saveProfile}
-                disabled={saving}
-              >
-                {saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
-              </button>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="main-button"
+                  onClick={saveProfile}
+                  disabled={saving}
+                >
+                  {saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
+                </button>
 
-              <button
-                className="login-button"
-                onClick={() => {
-                  setEditing(false)
-                  setMessage('')
-                }}
-              >
-                إلغاء
-              </button>
+                <button
+                  type="button"
+                  className="login-button"
+                  onClick={() => {
+                    setEditing(false)
+                    setMessage('')
+                  }}
+                >
+                  إلغاء
+                </button>
+              </div>
             </div>
           )}
 
@@ -899,6 +1073,7 @@ function App() {
   if (showLogin) {
     return (
       <main className="app" dir="rtl">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
         <nav className="navbar">
           <Brand onClick={goHome} />
           <button className="login-button" onClick={goHome}>
@@ -912,6 +1087,8 @@ function App() {
 
   return (
     <main className="app" dir="rtl">
+      <ThemeToggle theme={theme} onToggle={toggleTheme} />
+
       <nav className="navbar">
         <Brand onClick={goHome} />
 
@@ -921,10 +1098,7 @@ function App() {
           <a href="#branches">الفروع</a>
         </div>
 
-        <button
-          className="login-button"
-          onClick={() => setShowLogin(true)}
-        >
+        <button className="login-button" onClick={() => setShowLogin(true)}>
           تسجيل الدخول
         </button>
       </nav>
@@ -939,10 +1113,7 @@ function App() {
         <p className="hero-description">
           العب، استمتع، واكتشف تجربة مختلفة مع papa yaga.
         </p>
-        <button
-          className="main-button"
-          onClick={() => setShowLogin(true)}
-        >
+        <button className="main-button" onClick={() => setShowLogin(true)}>
           احجز تجربتك الآن
         </button>
       </section>
