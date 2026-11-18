@@ -7,6 +7,63 @@ import { supabase } from './supabase'
 
 type Section = 'home' | 'bookings' | 'payments' | 'customers' | 'branches'
 
+function Brand({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="العودة إلى الصفحة الرئيسية"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        direction: 'ltr',
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        color: '#f5f3ef',
+        textAlign: 'left',
+      }}
+    >
+      <img
+        src="/LOGO.png"
+        alt="papa yaga"
+        style={{
+          width: 65,
+          height: 65,
+          objectFit: 'contain',
+          display: 'block',
+        }}
+      />
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 7,
+          flexWrap: 'wrap',
+          fontFamily: 'Montserrat, sans-serif',
+          fontSize: 17,
+          fontWeight: 900,
+          letterSpacing: '-.6px',
+        }}
+      >
+        papa yaga
+        <span style={{ color: '#777e7a' }}>-</span>
+        <span
+          style={{
+            fontFamily: 'Cairo, sans-serif',
+            fontWeight: 800,
+            letterSpacing: 0,
+          }}
+        >
+          بابا ياجا
+        </span>
+      </span>
+    </button>
+  )
+}
+
 function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [section, setSection] = useState<Section>('home')
   const [bookings, setBookings] = useState<any[]>([])
@@ -175,9 +232,9 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   ).length
 
   const buttonStyle = {
-    background: '#252525',
+    background: '#252a29',
     color: '#fff',
-    border: '1px solid #555',
+    border: '1px solid rgba(255,255,255,.12)',
     padding: '12px 16px',
     borderRadius: 8,
     cursor: 'pointer',
@@ -187,8 +244,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   }
 
   const cardStyle = {
-    background: '#202020',
-    border: '1px solid #444',
+    background: '#151919',
+    border: '1px solid rgba(255,255,255,.09)',
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
@@ -240,7 +297,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           <div
             key={period.id}
             style={{
-              background: '#303030',
+              background: '#202625',
               padding: 12,
               borderRadius: 8,
               marginBottom: 10,
@@ -258,7 +315,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           <button
             style={{
               ...buttonStyle,
-              background: '#702d2d',
+              background: '#542b29',
               marginTop: 10,
             }}
             disabled={working}
@@ -311,7 +368,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
         {payment.payment_status === 'pending' && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <button
-              style={{ ...buttonStyle, background: '#285b35', flex: 1 }}
+              style={{ ...buttonStyle, background: '#28543a', flex: 1 }}
               disabled={working}
               onClick={() => approvePayment(payment.id)}
             >
@@ -319,7 +376,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
             </button>
 
             <button
-              style={{ ...buttonStyle, background: '#702d2d', flex: 1 }}
+              style={{ ...buttonStyle, background: '#542b29', flex: 1 }}
               disabled={working}
               onClick={() => rejectPayment(payment.id)}
             >
@@ -364,7 +421,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           <div
             key={device.id}
             style={{
-              background: '#303030',
+              background: '#202625',
               padding: 12,
               borderRadius: 8,
               marginBottom: 8,
@@ -433,13 +490,9 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
   ]
 
   return (
-    <main
-      className="app"
-      dir="rtl"
-      style={{ minHeight: '100vh', background: '#111', color: '#fff' }}
-    >
+    <main className="app" dir="rtl">
       <nav className="navbar">
-        <div className="logo">papa yaga</div>
+        <Brand onClick={onBack} />
         <button className="login-button" onClick={onBack}>
           العودة للحساب
         </button>
@@ -456,8 +509,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
       >
         <aside
           style={{
-            background: '#1b1b1b',
-            border: '1px solid #444',
+            background: '#111515',
+            border: '1px solid rgba(255,255,255,.09)',
             borderRadius: 12,
             padding: 15,
             position: 'sticky',
@@ -472,9 +525,9 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
               onClick={() => setSection(item.id)}
               style={{
                 ...buttonStyle,
-                background: section === item.id ? '#555' : '#252525',
+                background: section === item.id ? '#343b38' : '#202625',
                 marginBottom: 9,
-                borderColor: section === item.id ? '#aaa' : '#444',
+                borderColor: section === item.id ? '#9b8067' : 'rgba(255,255,255,.09)',
               }}
             >
               {item.label}
@@ -492,8 +545,8 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
 
         <section
           style={{
-            background: '#191919',
-            border: '1px solid #444',
+            background: '#101414',
+            border: '1px solid rgba(255,255,255,.09)',
             borderRadius: 12,
             padding: 20,
             minHeight: 500,
@@ -501,7 +554,7 @@ function AdminDashboard({ onBack }: { onBack: () => void }) {
           }}
         >
           {message && (
-            <p style={{ background: '#292929', padding: 12, borderRadius: 8 }}>
+            <p style={{ background: '#202625', padding: 12, borderRadius: 8 }}>
               {message}
             </p>
           )}
@@ -528,6 +581,46 @@ function App() {
   const [editPhone, setEditPhone] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+
+  function goHome() {
+    setShowLogin(false)
+    setShowBooking(false)
+    setShowAdmin(false)
+    setEditing(false)
+    setMessage('')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Scroll Reveal: إظهار العناصر عند وصولها إلى الشاشة
+  useEffect(() => {
+    if (user || showLogin || showBooking || showAdmin || checkingAuth) {
+      return
+    }
+
+    const elements = document.querySelectorAll(
+      '.services .service-card, .branches > *'
+    )
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      {
+        threshold: 0.15,
+      }
+    )
+
+    elements.forEach((element) => {
+      observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [user, showLogin, showBooking, showAdmin, checkingAuth])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -650,22 +743,39 @@ function App() {
   }
 
   if (checkingAuth) {
-    return <div className="app" dir="rtl">جارٍ تحميل الصفحة...</div>
+    return (
+      <div className="app" dir="rtl">
+        <nav className="navbar">
+          <Brand onClick={goHome} />
+        </nav>
+        <p style={{ padding: 30 }}>جارٍ تحميل الصفحة...</p>
+      </div>
+    )
   }
 
   if (user) {
     if (showAdmin && isAdmin) {
-      return <AdminDashboard onBack={() => setShowAdmin(false)} />
+      return <AdminDashboard onBack={goHome} />
     }
 
     if (showBooking) {
-      return <Booking />
+      return (
+        <main className="app" dir="rtl">
+          <nav className="navbar">
+            <Brand onClick={goHome} />
+            <button className="login-button" onClick={goHome}>
+              العودة للحساب
+            </button>
+          </nav>
+          <Booking />
+        </main>
+      )
     }
 
     return (
       <main className="app" dir="rtl">
         <nav className="navbar">
-          <div className="logo">papa yaga</div>
+          <Brand onClick={goHome} />
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {!checkingAdmin && isAdmin && (
@@ -787,13 +897,23 @@ function App() {
   }
 
   if (showLogin) {
-    return <Login />
+    return (
+      <main className="app" dir="rtl">
+        <nav className="navbar">
+          <Brand onClick={goHome} />
+          <button className="login-button" onClick={goHome}>
+            الرئيسية
+          </button>
+        </nav>
+        <Login />
+      </main>
+    )
   }
 
   return (
     <main className="app" dir="rtl">
       <nav className="navbar">
-        <div className="logo">papa yaga</div>
+        <Brand onClick={goHome} />
 
         <div className="nav-links">
           <a href="#home">الرئيسية</a>
@@ -865,7 +985,7 @@ function App() {
       </section>
 
       <footer>
-        <div className="logo">papa yaga</div>
+        <Brand onClick={goHome} />
         <p>© 2026 papa yaga. All rights reserved.</p>
       </footer>
     </main>
