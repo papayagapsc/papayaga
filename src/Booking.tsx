@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 
+type BookingMode = 'all' | 'playstation'
+
 type Branch = {
   id: string
   name: string
@@ -22,7 +24,7 @@ type BookedPeriod = {
   booked_end: string
 }
 
-function Booking() {
+function Booking({ mode = 'all' }: { mode?: BookingMode }) {
   const [branches, setBranches] = useState<Branch[]>([])
   const [devices, setDevices] = useState<Device[]>([])
   const [selectedBranch, setSelectedBranch] = useState('')
@@ -104,12 +106,23 @@ function Booking() {
         return
       }
 
+      const loadedDevices = (data || []) as Device[]
+
+      const visibleDevices =
+        mode === 'playstation'
+          ? loadedDevices.filter(
+              (device) =>
+                device.device_type === 'playstation_only' ||
+                device.device_type === 'room'
+            )
+          : loadedDevices
+
       setError('')
-      setDevices(data || [])
+      setDevices(visibleDevices)
     }
 
     loadDevices()
-  }, [selectedBranch])
+  }, [selectedBranch, mode])
 
   function getDevicePrice(device: Device) {
     if (device.device_type === 'playstation_only') {
@@ -492,17 +505,6 @@ function Booking() {
 
   return (
     <main className="app booking-page" dir="rtl">
-      <nav className="navbar">
-        <div className="logo">papa yaga</div>
-
-        <button
-          className="login-button"
-          onClick={() => window.location.reload()}
-        >
-          العودة للحساب
-        </button>
-      </nav>
-
       <section className="booking-section">
         <p className="eyebrow">BOOK YOUR EXPERIENCE</p>
 
@@ -579,7 +581,11 @@ function Booking() {
                 </div>
 
                 {devices.length === 0 && (
-                  <p>لا توجد أجهزة مسجلة في هذا الفرع.</p>
+                  <p>
+                    {mode === 'playstation'
+                      ? 'لا توجد أجهزة PlayStation أو غرف PlayStation + Cinema مسجلة في هذا الفرع.'
+                      : 'لا توجد أجهزة مسجلة في هذا الفرع.'}
+                  </p>
                 )}
               </>
             )}

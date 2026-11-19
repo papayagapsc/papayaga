@@ -7,6 +7,7 @@ import { supabase } from './supabase'
 
 type Section = 'home' | 'bookings' | 'payments' | 'customers' | 'branches'
 type Theme = 'light' | 'dark'
+type BookingMode = 'all' | 'playstation'
 
 function ThemeToggle({
   theme,
@@ -642,11 +643,16 @@ function App() {
   const [showLogin, setShowLogin] = useState(false)
   const [showBooking, setShowBooking] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [checkingAdmin, setCheckingAdmin] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+
+  const [bookingMode, setBookingMode] = useState<BookingMode>('all')
+  const [pendingBookingMode, setPendingBookingMode] =
+    useState<BookingMode | null>(null)
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')
@@ -663,17 +669,46 @@ function App() {
     setTheme((currentTheme) => currentTheme === 'light' ? 'dark' : 'light')
   }
 
+  function openBooking(mode: BookingMode) {
+    setBookingMode(mode)
+
+    if (user) {
+      setPendingBookingMode(null)
+      setShowLogin(false)
+      setShowAdmin(false)
+      setShowProfile(false)
+      setShowBooking(true)
+    } else {
+      setShowProfile(false)
+      setPendingBookingMode(mode)
+      setShowLogin(true)
+    }
+  }
+
+  useEffect(() => {
+    if (!user || !pendingBookingMode) return
+
+    setBookingMode(pendingBookingMode)
+    setPendingBookingMode(null)
+    setShowLogin(false)
+    setShowAdmin(false)
+    setShowBooking(true)
+  }, [user, pendingBookingMode])
+
   function goHome() {
     setShowLogin(false)
     setShowBooking(false)
     setShowAdmin(false)
+    setShowProfile(false)
+    setPendingBookingMode(null)
+    setBookingMode('all')
     setEditing(false)
     setMessage('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   useEffect(() => {
-    if (user || showLogin || showBooking || showAdmin || checkingAuth) return
+    if (showLogin || showBooking || showAdmin || showProfile || checkingAuth) return
 
     const elements = document.querySelectorAll(
       '.services .service-card, .branches > *'
@@ -694,7 +729,7 @@ function App() {
     elements.forEach((element) => observer.observe(element))
 
     return () => observer.disconnect()
-  }, [user, showLogin, showBooking, showAdmin, checkingAuth])
+  }, [user, showLogin, showBooking, showAdmin, showProfile, checkingAuth])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -706,6 +741,7 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) setShowLogin(false)
     })
 
     return () => subscription.unsubscribe()
@@ -845,7 +881,10 @@ function App() {
     setShowLogin(false)
     setShowBooking(false)
     setShowAdmin(false)
+    setShowProfile(false)
     setIsAdmin(false)
+    setPendingBookingMode(null)
+    setBookingMode('all')
   }
 
   if (checkingAuth) {
@@ -860,32 +899,32 @@ function App() {
     )
   }
 
-  if (user) {
-    if (showAdmin && isAdmin) {
-      return (
-        <AdminDashboard
-          onBack={goHome}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-        />
-      )
-    }
+  if (user && showAdmin && isAdmin) {
+    return (
+      <AdminDashboard
+        onBack={goHome}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    )
+  }
 
-    if (showBooking) {
-      return (
-        <main className="app" dir="rtl">
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <nav className="navbar">
-            <Brand onClick={goHome} />
-            <button className="login-button" onClick={goHome}>
-              العودة للحساب
-            </button>
-          </nav>
-          <Booking />
-        </main>
-      )
-    }
+  if (user && showBooking) {
+    return (
+      <main className="app" dir="rtl">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        <nav className="navbar">
+          <Brand onClick={goHome} />
+          <button className="login-button" onClick={goHome}>
+            العودة للرئيسية
+          </button>
+        </nav>
+        <Booking mode={bookingMode} />
+      </main>
+    )
+  }
 
+  if (user && showProfile) {
     return (
       <main className="app" dir="rtl">
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
@@ -963,7 +1002,7 @@ function App() {
               <button
                 type="button"
                 className="main-button"
-                onClick={() => setShowBooking(true)}
+                onClick={() => openBooking('all')}
               >
                 احجز الآن
               </button>
@@ -1098,9 +1137,36 @@ function App() {
           <a href="#branches">الفروع</a>
         </div>
 
-        <button className="login-button" onClick={() => setShowLogin(true)}>
-          تسجيل الدخول
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {user ? (
+            <>
+              {!checkingAdmin && isAdmin && (
+                <button
+                  className="main-button"
+                  onClick={() => setShowAdmin(true)}
+                >
+                  لوحة الإدارة
+                </button>
+              )}
+              <button
+                className="login-button"
+                onClick={() => {
+                  setEditing(false)
+                  setShowProfile(true)
+                }}
+              >
+                حسابي
+              </button>
+              <button className="login-button" onClick={handleLogout}>
+                تسجيل الخروج
+              </button>
+            </>
+          ) : (
+            <button className="login-button" onClick={() => setShowLogin(true)}>
+              تسجيل الدخول
+            </button>
+          )}
+        </div>
       </nav>
 
       <section className="hero" id="home">
@@ -1113,7 +1179,10 @@ function App() {
         <p className="hero-description">
           العب، استمتع، واكتشف تجربة مختلفة مع papa yaga.
         </p>
-        <button className="main-button" onClick={() => setShowLogin(true)}>
+        <button
+          className="main-button"
+          onClick={() => openBooking('all')}
+        >
           احجز تجربتك الآن
         </button>
       </section>
@@ -1123,10 +1192,58 @@ function App() {
         <h2>اكتشف خدماتنا</h2>
 
         <div className="service-grid">
-          <article className="service-card">
-            <span>01</span>
-            <h3>PlayStation</h3>
-            <p>تجربة ألعاب مميزة مع أصدقائك.</p>
+          <article
+            className="service-card"
+            style={{
+              position: 'relative',
+              minHeight: 260,
+              padding: 0,
+              overflow: 'hidden',
+              background: '#060909',
+            }}
+          >
+            <img
+              src="/playstation.webp"
+              alt="PlayStation"
+              loading="eager"
+              decoding="async"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+
+            <button
+              type="button"
+              aria-label="احجز أجهزة PlayStation"
+              title="احجز الآن"
+              onClick={() => openBooking('playstation')}
+              style={{
+                position: 'absolute',
+                right: 16,
+                bottom: 16,
+                width: 46,
+                height: 46,
+                borderRadius: '50%',
+                border: '1px solid #ffffff',
+                background: '#ffffff',
+                color: '#060909',
+                fontSize: 25,
+                fontWeight: 900,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 2,
+              }}
+            >
+              →
+            </button>
           </article>
 
           <article className="service-card">
