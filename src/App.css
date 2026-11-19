@@ -1258,3 +1258,14 @@ button:active:not(:disabled) {
 .brand-logo:hover {
   background: transparent !important;
 }
+
+/* PAPA YAGA INTRO - MOBILE FIX */
+
+@media (max-width: 700px) {
+  body::before {
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: #080909;
+  }
+}
